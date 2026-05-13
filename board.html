@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">PWA 互動留言板</h5>
+        <button onclick="location.href='/settings'" class="btn btn-sm btn-light">⚙️</button>
+    </div>
+
+    <div id="msg-container" class="p-3 bg-white" style="height: 400px; overflow-y: auto;">
+        <p class="text-muted text-center">正在讀取留言...</p>
+    </div>
+
+    <div class="card-footer bg-light border-0">
+        <input type="text" id="userName" class="form-control form-control-sm mb-2" placeholder="輸入大名">
+        <div class="input-group">
+            <input type="text" id="userInput" class="form-control" placeholder="說些話吧...">
+            <button onclick="sendMessage()" class="btn btn-primary">發送</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadMessages() {
+        try {
+            const res = await fetch('/get_messages');
+            const data = await res.json();
+            const container = document.getElementById('msg-container');
+            
+            if (!data || Object.keys(data).length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">目前尚無留言，快來當第一個！</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            // Firebase returns objects, we loop through keys
+            Object.keys(data).reverse().forEach(id => {
+                const msg = data[id];
+                const likes = msg.likes || 0;
+                const name = msg.name || "匿名";
+                
+                container.innerHTML += `
+                    <div class="card mb-2 border-0 shadow-sm">
+                        <div class="card-body p-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-secondary">${name}</span>
+                                <button class="btn btn-sm btn-outline-danger border-0" onclick="likeMsg('${id}')">
+                                    ❤️ ${likes}
+                                </button>
+                            </div>
+                            <p class="mb-0 mt-1" style="font-size: 1.1rem;">${msg.text}</p>
+                        </div>
+                    </div>`;
+            });
+        } catch (e) {
+            console.error("Error loading messages:", e);
+        }
+    }
+
+    async function sendMessage() {
+        const name = document.getElementById('userName').value || "匿名客";
+        const text = document.getElementById('userInput').value;
+        if (!text) return;
+
+        await fetch('/send_message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, text, likes: 0 })
+        });
+        document.getElementById('userInput').value = '';
+        loadMessages();
+    }
+
+    async function likeMsg(id) {
+        await fetch(`/api/like/${id}`, { method: 'PATCH' });
+        loadMessages();
+    }
+
+    setInterval(loadMessages, 5000);
+    loadMessages();
+</script>
+{% endblock %}

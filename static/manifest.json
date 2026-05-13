@@ -1,0 +1,20 @@
+{
+  "name": "Premium PWA Chat",
+  "short_name": "PremiumChat",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#6366f1",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/6366f1/ffffff?text=Chat",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/6366f1/ffffff?text=PremiumChat",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

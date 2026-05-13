@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="glass-card auth-card">
+    <h2>⚙️ 設定</h2>
+    <div style="margin-bottom: 20px; text-align: left;">
+        <label style="color: #fff; margin-bottom: 8px; display: block;">修改密碼</label>
+        <input type="password" placeholder="輸入新密碼" style="margin-bottom: 12px;">
+        <button onclick="alert('設定已儲存！'); location.href='/board'" class="auth-btn">儲存變更</button>
+        <button onclick="location.href='/board'" style="background:none; border:none; color:white; cursor:pointer; width:100%; margin-top:15px; text-decoration:underline;">返回留言板</button>
+    </div>
+</div>
+{% endblock %}

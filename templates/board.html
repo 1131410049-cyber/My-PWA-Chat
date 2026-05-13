@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="glass-card">
+    <div class="chat-header">
+        <h1>✨ 互動留言板</h1>
+        <button onclick="location.href='/settings'" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">⚙️</button>
+    </div>
+
+    <div id="msg-container">
+        <p style="text-align:center; color:rgba(255,255,255,0.8);">正在讀取留言...</p>
+    </div>
+
+    <div class="chat-input-area">
+        <div class="selectors">
+            <div class="select-wrapper">
+                <select id="userAvatar" title="選擇頭像">
+                    <option value="🐱">🐱 貓貓</option>
+                    <option value="🐶">🐶 狗狗</option>
+                    <option value="🦊">🦊 狐狸</option>
+                    <option value="🐻">🐻 熊熊</option>
+                    <option value="🐼">🐼 熊貓</option>
+                    <option value="🐨">🐨 無尾熊</option>
+                    <option value="🦁">🦁 獅子</option>
+                    <option value="🐯">🐯 老虎</option>
+                </select>
+            </div>
+            <div class="select-wrapper">
+                <select id="userMood" title="目前心情">
+                    <option value="😊 開心">😊 開心</option>
+                    <option value="😎 帥氣">😎 帥氣</option>
+                    <option value="🤩 興奮">🤩 興奮</option>
+                    <option value="😴 想睡">😴 想睡</option>
+                    <option value="🏃‍♂️ 忙碌">🏃‍♂️ 忙碌</option>
+                    <option value="🤔 思考">🤔 思考</option>
+                    <option value="😢 難過">😢 難過</option>
+                    <option value="🔥 充滿火熱">🔥 火熱</option>
+                </select>
+            </div>
+        </div>
+        
+        <input type="text" id="userName" placeholder="你的大名" style="margin-bottom: 10px;">
+        
+        <div class="input-row">
+            <input type="text" id="userInput" placeholder="說些什麼吧...">
+            <button onclick="sendMessage()" class="send-btn">發送</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadMessages() {
+        try {
+            const res = await fetch('/get_messages');
+            const data = await res.json();
+            const container = document.getElementById('msg-container');
+            
+            if (!data || Object.keys(data).length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:rgba(255,255,255,0.8);">目前尚無留言，快來當第一個！</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            // Firebase returns objects, we loop through keys
+            Object.keys(data).reverse().forEach(id => {
+                const msg = data[id];
+                const likes = msg.likes || 0;
+                const name = msg.name || "匿名";
+                const avatar = msg.avatar || "👤";
+                const mood = msg.mood || "無心情";
+                
+                container.innerHTML += `
+                    <div class="message-bubble">
+                        <div class="msg-meta">
+                            <span class="avatar-icon">${avatar}</span>
+                            <span class="user-name">${name}</span>
+                            <span class="mood-badge">${mood}</span>
+                        </div>
+                        <div class="msg-text">${msg.text}</div>
+                        <div class="msg-footer">
+                            <button class="like-btn" onclick="likeMsg('${id}')">
+                                ❤️ <span>${likes}</span>
+                            </button>
+                        </div>
+                    </div>`;
+            });
+        } catch (e) {
+            console.error("Error loading messages:", e);
+        }
+    }
+
+    async function sendMessage() {
+        const name = document.getElementById('userName').value || "匿名客";
+        const text = document.getElementById('userInput').value;
+        const avatar = document.getElementById('userAvatar').value;
+        const mood = document.getElementById('userMood').value;
+        
+        if (!text) return;
+
+        await fetch('/send_message', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, text, avatar, mood, likes: 0 })
+        });
+        document.getElementById('userInput').value = '';
+        loadMessages();
+    }
+
+    async function likeMsg(id) {
+        await fetch(`/api/like/${id}`, { method: 'PATCH' });
+        loadMessages();
+    }
+
+    setInterval(loadMessages, 5000);
+    loadMessages();
+</script>
+{% endblock %}

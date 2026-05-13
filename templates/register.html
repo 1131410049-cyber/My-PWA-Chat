@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="glass-card auth-card">
+    <h2>✨ 加入我們</h2>
+    <div style="margin-bottom: 20px;">
+        <input type="text" placeholder="設定帳號" style="margin-bottom: 12px;">
+        <input type="password" placeholder="設定密碼" style="margin-bottom: 12px;">
+        <button onclick="location.href='/'" class="auth-btn">註冊並登入</button>
+    </div>
+    <p style="color: rgba(255,255,255,0.8);">已經有帳號了？ <a href="/" style="color: #fff; font-weight: 600;">點我登入</a></p>
+</div>
+{% endblock %}
